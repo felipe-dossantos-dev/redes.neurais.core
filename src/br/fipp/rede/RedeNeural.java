@@ -18,7 +18,7 @@ public class RedeNeural {
     public static int QTD_NEURON_ENTRADA = 6;
     public static int QTD_NEURON_OCULTO = 5;
     public static int QTD_CLASSES_SAIDA = 5;
-    public static double ERRO = 0.00001;
+    public static double ERRO = 0.0001;
     public static int ITERACAO = 1000;
     public static double TX_APRENDIZAGEM = 0.3;
 
@@ -31,8 +31,8 @@ public class RedeNeural {
     private final Neuronio[] camadaOculta;
     private final Neuronio[] camadaSaida;
     private List<Entrada> listaEntrada;
-    private final List<Double> listaSomaErros;
-    private final Normalizacao normalizacao;
+    private List<Double> listaSomaErros;
+    private Normalizacao normalizacao;
     private final LeitorEntradas leitor;
     private final FuncaoSaida funcaoSaida;
 
@@ -84,9 +84,9 @@ public class RedeNeural {
 
     public void treinar() throws IOException {
         this.listaEntrada = leitor.lerEntradas();
+        normalizacao = leitor.getNormalizacao();
         double erroAtual = 1000;
-        for (int x = 0; x < ITERACAO; x++) {
-            int qtdAcertos = 0;
+        for (int x = 0; x < this.iteracao && erroAtual > erroMinimo; x++) {
             for (Entrada ent : listaEntrada) {
                 if (x == 0) {
                     ent.setEntradas(normalizacao.normalizar(ent.getEntradas()));
@@ -115,23 +115,23 @@ public class RedeNeural {
                         valorMaior = camadaSaida[i].getSaida();
                     }
                 }
-                if (pos + 1 == ent.getResposta()) {
-                    qtdAcertos++;
-                }
                 //erro dos neuronios de saida e erro da rede
                 double sum = 0;
                 for (int i = 0; i < qtdClasses; i++) {
                     Neuronio n = camadaSaida[i];
-                    //esses valores podem estar errados, estar prejudicando o aprendizado
+                    double erro;
                     if (ent.getResposta() - 1 != i) {
-                        n.setErro((0 - n.getSaida()) * funcaoSaida.calcularDerivada(n.getNet()));
+                        erro = (0 - n.getSaida()) * funcaoSaida.calcularDerivada(n.getNet());
+                        n.setErro(erro);
                     } else {
-                        n.setErro((1 - n.getSaida()) * funcaoSaida.calcularDerivada(n.getNet()));
+                        erro = (1 - n.getSaida()) * funcaoSaida.calcularDerivada(n.getNet());
+                        n.setErro(erro);
                     }
                     sum += Math.pow(n.getErro(), 2);
                 }
                 erroAtual = sum / 2;
                 listaSomaErros.add(erroAtual);
+
                 //erro saida -> oculta  
                 for (int i = 0; i < qtdOcultos; i++) {
                     Neuronio n = camadaOculta[i];
@@ -143,34 +143,35 @@ public class RedeNeural {
                     erro = erro * funcaoSaida.calcularDerivada(n.getNet());
                     n.setErro(erro);
                 }
+
                 //recalcular pesos camada saida
                 for (int i = 0; i < qtdClasses; i++) {
                     Neuronio s = camadaSaida[i];
                     for (int k = 0; k < qtdOcultos; k++) {
                         double pesoAtual = s.getPesos()[k];
-                        pesoAtual = pesoAtual + (txAprendizagem * (s.getErro() * camadaOculta[k].getSaida()));
+                        pesoAtual = pesoAtual + txAprendizagem * s.getErro() * camadaOculta[k].getSaida();
                         s.getPesos()[k] = pesoAtual;
                     }
                 }
+
                 //recalcular pesos camada oculta
                 for (int i = 0; i < qtdOcultos; i++) {
                     Neuronio n = camadaOculta[i];
                     for (int k = 0; k < qtdEntrada; k++) {
                         double pesoAtual = n.getPesos()[k];
-                        pesoAtual = pesoAtual + (txAprendizagem * (n.getErro() * ent.getEntradas()[k]));
+                        pesoAtual = pesoAtual + txAprendizagem * n.getErro() * ent.getEntradas()[k];
                         n.getPesos()[k] = pesoAtual;
                     }
                 }
-                //System.out.println("Valor Erro Rede: " + (sum / 2));
             }
         }
-        //System.out.println(listaSomaErros);
     }
 
     public void avaliar(LeitorEntradas le) throws IOException {
         this.listaEntrada = le.lerEntradas();
         int qtdAcertos = 0;
         for (Entrada ent : listaEntrada) {
+            ent.setEntradas(normalizacao.normalizar(ent.getEntradas()));
             //ida 
             //entrada -> oculto
             double saidasOcultas[] = new double[qtdOcultos]; //para ter os valores de saida da camada oculta
@@ -199,12 +200,19 @@ public class RedeNeural {
                 qtdAcertos++;
             }
         }
-        System.out.println("Pcte Acertos: " + (listaEntrada.size() / qtdAcertos) + "%");
+        System.out.println("Porcentagem: " + ((double)qtdAcertos / listaEntrada.size()));
+    }
+
+    public List<Double> getListaSomaErros() {
+        return listaSomaErros;
+    }
+
+    public void setListaSomaErros(List<Double> listaSomaErros) {
+        this.listaSomaErros = listaSomaErros;
     }
 
     @Override
     public String toString() {
         return "RedesNeurais{" + "qtdClasses=" + qtdClasses + ", qtdEntrada=" + qtdEntrada + ", qtdOcultos=" + qtdOcultos + ", erroMinimo=" + erroMinimo + ", txAprendizagem=" + txAprendizagem + ", iteracao=" + iteracao + ", listaSomaErros=" + listaSomaErros + ", normalizacao=" + normalizacao + '}';
     }
-
 }

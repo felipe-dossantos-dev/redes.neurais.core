@@ -19,10 +19,10 @@ public class Normalizacao {
 
     public Normalizacao(int qtdEntrada) {
         menores = new double[qtdEntrada];
-        Arrays.fill(menores, Double.MAX_VALUE);
+        Arrays.fill(menores, 9999999999999.0);
         
         maiores = new double[qtdEntrada];
-        Arrays.fill(maiores, Double.MIN_VALUE);
+        Arrays.fill(maiores, -999999999999.0);
         
         intervalos = null;
     }

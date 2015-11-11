@@ -6,6 +6,8 @@ package br.fipp.teste;
  * and open the template in the editor.
  */
 
+import br.fipp.funcao.saida.FuncaoLinear;
+import br.fipp.funcao.saida.FuncaoSaida;
 import br.fipp.rede.Neuronio;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -89,5 +91,16 @@ public class NeuronioTest {
         double saida = neuronio3.gerarNet(ents);
         Assert.assertEquals(saida, -0.69, 0.000001);
     }
-    
+ 
+    public void gerarNovoPeso() {
+        FuncaoSaida fs = new FuncaoLinear(1);
+        Neuronio n = new Neuronio(1);
+        n.setErro(1.69);
+        double pesos[] = {-1.4};
+        n.setPesos(pesos);
+        double txAprendizado = 1;
+        double ic = 1.4;
+        double novoErro = n.getPesos()[0] + txAprendizado * n.getErro() * ic;
+        Assert.assertEquals(novoErro, -1.166, 0.001);
+    }
 }

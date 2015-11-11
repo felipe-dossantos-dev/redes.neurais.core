@@ -64,6 +64,6 @@ public class Entrada {
 
     @Override
     public String toString() {
-        return "Entrada{" + "entradas=" + entradas + ", resposta=" + resposta + '}';
+        return "Entrada{" + "entradas=" + Arrays.toString(entradas) + ", resposta=" + resposta + '}';
     }
 }
