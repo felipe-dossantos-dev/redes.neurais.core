@@ -3,15 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.fipp.rede;
+package br.fipp.entrada;
 
-import br.fipp.entrada.Entrada;
-import br.fipp.entrada.Normalizacao;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +23,8 @@ public class LeitorEntradasCSV implements LeitorEntradas {
 
     private String filePath;
     private Normalizacao normalizacao;
+    private Set<String> tiposRespostas;
+    private MatrizConfusao matConfusao;
 
     public LeitorEntradasCSV() {
     }
@@ -59,13 +60,15 @@ public class LeitorEntradasCSV implements LeitorEntradas {
                     }
                 }
                 t.setEntradas(ents);
-                t.setResposta(new Integer(vet[qtdEntrada]));
+                tiposRespostas.add(vet[qtdEntrada]);
+                t.setResposta(vet[qtdEntrada]);
                 entradas.add(t);
                 linha = entrada.readLine();
             }
         } catch (IOException | NumberFormatException ex) {
             Logger.getLogger(LeitorEntradasCSV.class.getName()).log(Level.SEVERE, null, ex);
         }
+        matConfusao = new MatrizConfusao(tiposRespostas);
         return entradas;
     }
 
@@ -80,5 +83,10 @@ public class LeitorEntradasCSV implements LeitorEntradas {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    @Override
+    public MatrizConfusao getMatrizConfusao() {
+        return matConfusao;
     }
 }

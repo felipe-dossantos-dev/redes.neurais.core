@@ -1,5 +1,7 @@
 package br.fipp.rede;
 
+import br.fipp.entrada.LeitorEntradasCSV;
+import br.fipp.entrada.LeitorEntradas;
 import br.fipp.entrada.Entrada;
 import br.fipp.entrada.Normalizacao;
 import br.fipp.funcao.saida.FuncaoSaida;

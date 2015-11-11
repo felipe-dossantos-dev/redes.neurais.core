@@ -14,17 +14,17 @@ import java.util.Objects;
  */
 public class Entrada {
     private double[] entradas;
-    private int resposta;
+    private String resposta;
     
     public Entrada(int qtdEntrada) {
         entradas = new double[qtdEntrada];
     }
 
-    public int getResposta() {
+    public String getResposta() {
         return resposta;
     }
 
-    public void setResposta(int resposta) {
+    public void setResposta(String resposta) {
         this.resposta = resposta;
     }
 

@@ -7,7 +7,7 @@ package br.fipp.teste;
 
 import br.fipp.entrada.Entrada;
 import br.fipp.entrada.Normalizacao;
-import br.fipp.rede.LeitorEntradasCSV;
+import br.fipp.entrada.LeitorEntradasCSV;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
