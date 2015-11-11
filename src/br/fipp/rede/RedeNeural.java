@@ -6,6 +6,7 @@ import br.fipp.funcao.saida.FuncaoSaida;
 import br.fipp.funcao.saida.FuncaoTangenteHiperb;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -91,31 +92,24 @@ public class RedeNeural {
                 if (x == 0) {
                     ent.setEntradas(normalizacao.normalizar(ent.getEntradas()));
                 }
-                //ida 
-                //entrada -> oculto
-                double saidasOcultas[] = new double[qtdOcultos]; //para ter os valores de saida da camada oculta
+                double saidasOcultas[] = new double[qtdOcultos];
                 for (int i = 0; i < qtdOcultos; i++) {
                     double net = camadaOculta[i].gerarNet(ent.getEntradas());
                     double saida = funcaoSaida.calcular(net);
                     camadaOculta[i].setSaida(saida);
                     saidasOcultas[i] = saida;
                 }
-                //oculto -> saida
                 for (int i = 0; i < qtdClasses; i++) {
                     double net = camadaSaida[i].gerarNet(saidasOcultas);
                     double saida = funcaoSaida.calcular(net);
                     camadaSaida[i].setSaida(saida);
                 }
-                //neuronio vencedor
                 double valorMaior = Double.MIN_VALUE;
-                int pos = -1;
                 for (int i = 0; i < qtdClasses; i++) {
                     if (camadaSaida[i].getSaida() > valorMaior) {
-                        pos = i;
                         valorMaior = camadaSaida[i].getSaida();
                     }
                 }
-                //erro dos neuronios de saida e erro da rede
                 double sum = 0;
                 for (int i = 0; i < qtdClasses; i++) {
                     Neuronio n = camadaSaida[i];
@@ -130,9 +124,7 @@ public class RedeNeural {
                     sum += Math.pow(n.getErro(), 2);
                 }
                 erroAtual = sum / 2;
-                listaSomaErros.add(erroAtual);
-
-                //erro saida -> oculta  
+                
                 for (int i = 0; i < qtdOcultos; i++) {
                     Neuronio n = camadaOculta[i];
                     double erro = 0;
@@ -143,8 +135,6 @@ public class RedeNeural {
                     erro = erro * funcaoSaida.calcularDerivada(n.getNet());
                     n.setErro(erro);
                 }
-
-                //recalcular pesos camada saida
                 for (int i = 0; i < qtdClasses; i++) {
                     Neuronio s = camadaSaida[i];
                     for (int k = 0; k < qtdOcultos; k++) {
@@ -153,8 +143,6 @@ public class RedeNeural {
                         s.getPesos()[k] = pesoAtual;
                     }
                 }
-
-                //recalcular pesos camada oculta
                 for (int i = 0; i < qtdOcultos; i++) {
                     Neuronio n = camadaOculta[i];
                     for (int k = 0; k < qtdEntrada; k++) {
@@ -164,6 +152,7 @@ public class RedeNeural {
                     }
                 }
             }
+            listaSomaErros.add(erroAtual);
         }
     }
 
