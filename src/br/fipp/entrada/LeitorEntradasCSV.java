@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ public class LeitorEntradasCSV implements LeitorEntradas {
 
     public LeitorEntradasCSV(String filePath) {
         this.filePath = filePath;
+        tiposRespostas = new HashSet<>();
     }
 
     @Override

@@ -29,13 +29,20 @@ public class MatrizConfusao {
         }
     }
 
-    public void contar(String esperado, String resultado) {
+    public void contar(String esperado, int resultado) {
         int esp = mapa.get(esperado);
-        int res = mapa.get(resultado);
-        matrizConfusao[esp][res]++;
+        matrizConfusao[esp][resultado]++;
     }
     
     public int[][] getMatriz() {
         return matrizConfusao;
+    }
+    
+    public int getPosicao(String chave) {
+        return mapa.get(chave);
+    }
+    
+    public Set<String> getChaves() {
+        return mapa.keySet();
     }
 }

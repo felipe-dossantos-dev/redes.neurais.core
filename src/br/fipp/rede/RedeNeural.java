@@ -3,14 +3,14 @@ package br.fipp.rede;
 import br.fipp.entrada.LeitorEntradasCSV;
 import br.fipp.entrada.LeitorEntradas;
 import br.fipp.entrada.Entrada;
+import br.fipp.entrada.MatrizConfusao;
 import br.fipp.entrada.Normalizacao;
 import br.fipp.funcao.saida.FuncaoSaida;
 import br.fipp.funcao.saida.FuncaoTangenteHiperb;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 /**
  *
@@ -21,7 +21,7 @@ public class RedeNeural {
     public static int QTD_NEURON_ENTRADA = 6;
     public static int QTD_NEURON_OCULTO = 5;
     public static int QTD_CLASSES_SAIDA = 5;
-    public static double ERRO = 0.0001;
+    public static double ERRO = 0.00001;
     public static int ITERACAO = 1000;
     public static double TX_APRENDIZAGEM = 0.3;
 
@@ -38,11 +38,9 @@ public class RedeNeural {
     private Normalizacao normalizacao;
     private final LeitorEntradas leitor;
     private final FuncaoSaida funcaoSaida;
+    private MatrizConfusao matConfusao;
 
     public static void main(String[] args) throws IOException {
-        //arquivo cam.entrada cam.saida cam.oculta -i|-e(iteracao| erro) num txApren func(-lin|-sig|-hip)(linear|sigmoide|hiperbolica)
-        Locale.setDefault(Locale.US);
-
         RedeNeural rede = new RedeNeural(QTD_NEURON_ENTRADA,
                 QTD_CLASSES_SAIDA,
                 QTD_NEURON_OCULTO,
@@ -88,6 +86,7 @@ public class RedeNeural {
     public void treinar() throws IOException {
         this.listaEntrada = leitor.lerEntradas();
         normalizacao = leitor.getNormalizacao();
+        matConfusao = leitor.getMatrizConfusao();
         double erroAtual = 1000;
         for (int x = 0; x < this.iteracao && erroAtual > erroMinimo; x++) {
             for (Entrada ent : listaEntrada) {
@@ -112,11 +111,12 @@ public class RedeNeural {
                         valorMaior = camadaSaida[i].getSaida();
                     }
                 }
+                //erro saida
                 double sum = 0;
                 for (int i = 0; i < qtdClasses; i++) {
                     Neuronio n = camadaSaida[i];
                     double erro;
-                    if (ent.getResposta() - 1 != i) {
+                    if (matConfusao.getPosicao(ent.getResposta()) != i) {
                         erro = (0 - n.getSaida()) * funcaoSaida.calcularDerivada(n.getNet());
                         n.setErro(erro);
                     } else {
@@ -126,7 +126,7 @@ public class RedeNeural {
                     sum += Math.pow(n.getErro(), 2);
                 }
                 erroAtual = sum / 2;
-                
+
                 for (int i = 0; i < qtdOcultos; i++) {
                     Neuronio n = camadaOculta[i];
                     double erro = 0;
@@ -159,8 +159,7 @@ public class RedeNeural {
     }
 
     public void avaliar(LeitorEntradas le) throws IOException {
-        this.listaEntrada = le.lerEntradas();
-        int qtdAcertos = 0;
+        this.listaEntrada = le.lerEntradas();;
         for (Entrada ent : listaEntrada) {
             ent.setEntradas(normalizacao.normalizar(ent.getEntradas()));
             //ida 
@@ -187,11 +186,11 @@ public class RedeNeural {
                     valorMaior = camadaSaida[i].getSaida();
                 }
             }
-            if (pos + 1 == ent.getResposta()) {
-                qtdAcertos++;
-            }
+            //dependendo do valor da funcao linear, o valor cai para NaN, e dai nao passa no if do valor maior
+            if (pos != -1)
+                matConfusao.contar(ent.getResposta(), pos);
+
         }
-        System.out.println("Porcentagem: " + ((double)qtdAcertos / listaEntrada.size()));
     }
 
     public List<Double> getListaSomaErros() {
@@ -200,6 +199,10 @@ public class RedeNeural {
 
     public void setListaSomaErros(List<Double> listaSomaErros) {
         this.listaSomaErros = listaSomaErros;
+    }
+
+    public MatrizConfusao getMatrizConfusao() {
+        return matConfusao;
     }
 
     @Override
