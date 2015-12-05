@@ -87,8 +87,8 @@ public class RedeNeural {
         this.listaEntrada = leitor.lerEntradas();
         normalizacao = leitor.getNormalizacao();
         matConfusao = leitor.getMatrizConfusao();
-        double erroAtual = 1000;
-        for (int x = 0; x < this.iteracao && erroAtual > erroMinimo; x++) {
+        double erroTotalRede = 1000;
+        for (int x = 0; x < this.iteracao && erroTotalRede > erroMinimo; x++) {
             for (Entrada ent : listaEntrada) {
                 if (x == 0) {
                     ent.setEntradas(normalizacao.normalizar(ent.getEntradas()));
@@ -125,7 +125,7 @@ public class RedeNeural {
                     }
                     sum += Math.pow(n.getErro(), 2);
                 }
-                erroAtual = sum / 2;
+                erroTotalRede = sum / 2;
 
                 for (int i = 0; i < qtdOcultos; i++) {
                     Neuronio n = camadaOculta[i];
@@ -154,12 +154,12 @@ public class RedeNeural {
                     }
                 }
             }
-            listaSomaErros.add(erroAtual);
+            listaSomaErros.add(erroTotalRede);
         }
     }
 
     public void avaliar(LeitorEntradas le) throws IOException {
-        this.listaEntrada = le.lerEntradas();;
+        this.listaEntrada = le.lerEntradas();
         for (Entrada ent : listaEntrada) {
             ent.setEntradas(normalizacao.normalizar(ent.getEntradas()));
             //ida 

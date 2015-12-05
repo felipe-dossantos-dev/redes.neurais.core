@@ -24,7 +24,7 @@ public class FuncaoLinear implements FuncaoSaida{
 
     @Override
     public double calcularDerivada(double net) {
-        return constante;
+        return 1 / constante;
     }
     
 }
